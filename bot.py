@@ -6,10 +6,6 @@ from bottle import (
 )
 
 # Globals
-
-if len(sys.argv) < 2:
-	print('Expected two arguments')
-	exit()
 	
 API_TOKEN = sys.argv[1]
 BOT_URL = 'https://api.telegram.org/bot' + API_TOKEN + '/'
@@ -194,6 +190,9 @@ def main():
 	return response  # status 200 OK by default
 
 if __name__ == '__main__':
+	if len(sys.argv) < 2:
+		print('Expected two arguments')
+		exit()
 	load_subs(SUBS_FILE)
 	run(host='localhost', port=8080, debug=True)
 	
