@@ -15,9 +15,10 @@ API_TOKEN = sys.argv[1]
 BOT_URL = 'https://api.telegram.org/bot' + API_TOKEN + '/'
 SUB_LIST = {}
 SUBS_FILE = 'subs.txt'
+CISCO_OFFSET = 184
 
-# Debug
-	
+
+# Debug	
 def log_command(command):
 	print('Recieved ' + command + ' command')
 	
@@ -121,6 +122,10 @@ def handle_command(command, args, data):
 	
 	return
 
+def should_recieve_alert(chat_id, alert_level):
+	return alert_level <= SUB_LIST[chat_id].alert_level 
+		
+
 # Sub Command handling
 def add_sub(chat_id):
 	if chat_id in SUB_LIST:
@@ -146,6 +151,15 @@ def set_alert_level(chat_id, level):
 		return True
 	else:
 		return False
+	
+def get_alert_level_from_log_msg(msg):
+	sub_str = msg.split(']')[0]
+	str_alert_lvl = sub_str.remove('[')
+	alert_level = int(str_alert_lvl) - CISCO_OFFSET
+	
+	print(alert_level)
+	
+	return alert_level
 	
 # File handling
 def save_subs(filename):
@@ -176,7 +190,7 @@ def load_subs(filename):
 class Sub:
 	def __init__(self, chat_id):
 		self.chat_id = chat_id
-		self.alert_level = 0
+		self.alert_level = 7
 	
 # Server
 def init_server():
@@ -186,10 +200,12 @@ def init_server():
 def read_log_messages():
 	while True:
 		# Get log messages
-		line = input()
+		log_msg = input()
 		# Broadcast to every subscriber
 		for chat_id in SUB_LIST:
-			send_message(chat_id, line)
+			alert_lvl = get_alert_level_from_log_msg(log_msg)
+			if should_recieve_alert(chat_id, alert_lvl):
+				send_message(chat_id, log_msg)
 	
 @post('/')
 def main():  
