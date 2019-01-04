@@ -211,6 +211,6 @@ if __name__ == '__main__':
 		print('Expected one telegram token argument')
 		exit()
 	load_subs(SUBS_FILE)
-	_thread.start_new_thread(init_server, ())
 	_thread.start_new_thread(read_log_messages, ())
+	init_server()
 	
