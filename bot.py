@@ -154,7 +154,7 @@ def set_alert_level(chat_id, level):
 	
 def get_alert_level_from_log_msg(msg):
 	sub_str = msg.split(']')[0]
-	str_alert_lvl = sub_str.remove('[')
+	str_alert_lvl = sub_str.replace('[', '')
 	alert_level = int(str_alert_lvl) - CISCO_OFFSET
 	
 	print(alert_level)
