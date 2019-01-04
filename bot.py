@@ -1,6 +1,10 @@
+#!/usr/bin/python3
+
 import requests
 import json
 import sys
+import _thread
+
 from bottle import (  
     run, post, response, request as bottle_request
 )
@@ -174,6 +178,19 @@ class Sub:
 		self.chat_id = chat_id
 		self.alert_level = 0
 	
+# Server
+def init_server():
+	run(host='localhost', port=8080, debug=True)
+
+# Read from syslog-ng data
+def read_log_messages():
+	while True:
+		# Get log messages
+		line = input()
+		# Broadcast to every subscriber
+		for chat_id in SUB_LIST:
+			send_message(chat_id, line)
+	
 @post('/')
 def main():  
 	# Get JSON Data
@@ -191,8 +208,10 @@ def main():
 
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
-		print('Expected two arguments')
+		print('Expected one telegram token argument')
 		exit()
 	load_subs(SUBS_FILE)
-	run(host='localhost', port=8080, debug=True)
+	_thread.start_new_thread(init_server, ())
+	_thread.start_new_thread(read_log_messages, ())
+	init_server()
 	
